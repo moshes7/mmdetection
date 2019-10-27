@@ -806,3 +806,45 @@ class Albu(object):
         repr_str = self.__class__.__name__
         repr_str += '(transformations={})'.format(self.transformations)
         return repr_str
+
+
+@PIPELINES.register_module
+class Color2Gray(object):
+    """Convert color image to grayscale image.
+
+    Convert color image to grayscale image.
+
+    Args:
+        color_type (str): color type, one of {bgr, rgb}. Default is rgb.
+    """
+
+    def __init__(self, color_type='rgb'):
+
+        # save color type
+        self.color_type = color_type
+
+        # set color 2 gray function
+        if self.color_type == 'bgr':
+            self.color2gray = mmcv.bgr2gray
+        elif self.color_type == 'rgb':
+            self.color2gray = mmcv.rgb2gray
+        else:
+            self.color2gray = None
+
+    def __call__(self, results):
+
+        if self.color2gray is None:
+            return
+
+        # img = results['img']
+        results['img'] = self.color2gray(results['img'], keepdim=True)
+        # results['img'] = img
+
+        return results
+
+    def __repr__(self):
+        repr_str = self.__class__.__name__
+        repr_str += '(color_type={})'.format(
+            self.color2gray)
+        return repr_str
+

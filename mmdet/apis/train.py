@@ -221,7 +221,12 @@ def _non_dist_train(model, dataset, cfg, validate=False):
                                    cfg.checkpoint_config, cfg.log_config)
 
     if cfg.resume_from:
-        runner.resume(cfg.resume_from)
+        checkpoint = runner.resume(cfg.resume_from)
     elif cfg.load_from:
         runner.load_checkpoint(cfg.load_from)
+
+    if cfg['model']['first_layer_color_2_gray']:
+        channel_to_load = 1
+        runner.model.module.state_dict()['backbone.conv1.weight'].copy_(checkpoint['state_dict']['backbone.conv1.weight'][:, channel_to_load, :, :].unsqueeze(dim=1))
+
     runner.run(data_loaders, cfg.workflow, cfg.total_epochs)

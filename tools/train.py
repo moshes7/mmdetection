@@ -62,7 +62,7 @@ def main():
 
     if args.autoscale_lr:
         # apply the linear scaling rule (https://arxiv.org/abs/1706.02677)
-        cfg.optimizer['lr'] = cfg.optimizer['lr'] * cfg.gpus / 8
+        cfg.optimizer['lr'] = cfg.optimizer['lr'] * cfg.gpus / 8 # FIXME: consider total batch size, with number of sample per each gpu
 
     # init distributed env first, since logger depends on the dist info.
     if args.launcher == 'none':

@@ -493,10 +493,22 @@ class ResNet(nn.Module):
             for param in m.parameters():
                 param.requires_grad = False
 
-    def init_weights(self, pretrained=None):
+    def init_weights(self, pretrained=None, first_layer_color_2_gray=None):
         if isinstance(pretrained, str):
             logger = logging.getLogger()
-            load_checkpoint(self, pretrained, strict=False, logger=logger)
+            checkpoint = load_checkpoint(self, pretrained, strict=False, logger=logger)
+
+            # load first layer weights
+            if first_layer_color_2_gray is not None:
+                # if the input image is switched from color to grayscale, the number of color channels is reduced
+                # accordingly from 3 to 1, and the shape of the first convolution layer is reduced from 64x3x7x7 to
+                # 64x1x7x7, therefore the layer weights cannot be regulary loaded.
+                # in order to accommodate that, we'll load one of the color channels weight (maybe even their mean?).
+                # it can be any one of the channels, here we arbitrarily load channel 1.
+                channel_to_load = 1
+                self.state_dict()['conv1.weight'].copy_(checkpoint['conv1.weight'][:, channel_to_load, :, :].unsqueeze(dim=1))
+
+
         elif pretrained is None:
             for m in self.modules():
                 if isinstance(m, nn.Conv2d):

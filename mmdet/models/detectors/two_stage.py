@@ -28,7 +28,8 @@ class TwoStageDetector(BaseDetector, RPNTestMixin, BBoxTestMixin,
                  mask_head=None,
                  train_cfg=None,
                  test_cfg=None,
-                 pretrained=None):
+                 pretrained=None,
+                 first_layer_color_2_gray=None):
         super(TwoStageDetector, self).__init__()
         self.backbone = builder.build_backbone(backbone)
 
@@ -59,15 +60,15 @@ class TwoStageDetector(BaseDetector, RPNTestMixin, BBoxTestMixin,
         self.train_cfg = train_cfg
         self.test_cfg = test_cfg
 
-        self.init_weights(pretrained=pretrained)
+        self.init_weights(pretrained=pretrained, first_layer_color_2_gray=first_layer_color_2_gray)
 
     @property
     def with_rpn(self):
         return hasattr(self, 'rpn_head') and self.rpn_head is not None
 
-    def init_weights(self, pretrained=None):
+    def init_weights(self, pretrained=None, first_layer_color_2_gray=None):
         super(TwoStageDetector, self).init_weights(pretrained)
-        self.backbone.init_weights(pretrained=pretrained)
+        self.backbone.init_weights(pretrained=pretrained, first_layer_color_2_gray=first_layer_color_2_gray)
         if self.with_neck:
             if isinstance(self.neck, nn.Sequential):
                 for m in self.neck:
